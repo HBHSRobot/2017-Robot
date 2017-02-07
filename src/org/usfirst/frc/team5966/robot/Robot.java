@@ -57,7 +57,7 @@ public class Robot extends IterativeRobot {
 		}
 		leftMotors[0].set(0.7);
 		//XBOX Controller
-		driveStick = new Joystick(1);
+		driveStick = new Joystick(0);
 		
 	}
 	
@@ -136,10 +136,10 @@ public class Robot extends IterativeRobot {
 		while (isOperatorControl() && isEnabled())
 		{
 			//drive motor sets 1, 2, and 3
-			for (int i = 0; i < NUM_MOTORS; i++)
-			{
+			//for (int i = 0; i < NUM_MOTORS; i++)
+			//{
 				robotDrives[i].arcadeDrive(driveStick);
-			}
+			//}
 			Timer.delay(0.01);
 		}
 	}
