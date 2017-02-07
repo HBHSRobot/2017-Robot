@@ -138,7 +138,7 @@ public class Robot extends IterativeRobot {
 			//drive motor sets 1, 2, and 3
 			//for (int i = 0; i < NUM_MOTORS; i++)
 			//{
-				robotDrives[i].arcadeDrive(driveStick);
+				robotDrives[0].arcadeDrive(driveStick);
 			//}
 			Timer.delay(0.01);
 		}
