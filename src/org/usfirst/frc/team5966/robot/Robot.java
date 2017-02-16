@@ -47,6 +47,8 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putData("Auto mode", chooser);
 		//left motors are PWM 0, 1, 2
 		//right motors are PWM 3, 4, 5
+		leftMotors = new VictorSP[3];
+		rightMotors = new VictorSP[3];
 		for (int i = 0; i < NUM_MOTORS; i++)
 		{
 			leftMotors[i] = new VictorSP(i);
