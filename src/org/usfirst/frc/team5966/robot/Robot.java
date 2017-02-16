@@ -22,6 +22,7 @@ import org.usfirst.frc.team5966.robot.subsystems.ExampleSubsystem;
 public class Robot extends IterativeRobot {
 
 	final int NUM_MOTORS = 3;
+	final int NUM_OF_PWM_SLOTS = 9;
 	
 	public static final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
 	public static OI oi;
@@ -55,7 +56,7 @@ public class Robot extends IterativeRobot {
 		for (int i = 0; i < NUM_MOTORS; i++)
 		{
 			leftMotors[i] = new VictorSP(i);
-			rightMotors[i] = new VictorSP(i + NUM_MOTORS);
+			rightMotors[i] = new VictorSP(NUM_OF_PWM_SLOTS - i);
 			
 			robotDrives[i] = new RobotDrive(leftMotors[i],
 					 rightMotors[i]);
