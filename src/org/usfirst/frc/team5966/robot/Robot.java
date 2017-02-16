@@ -29,6 +29,8 @@ public class Robot extends IterativeRobot {
 	Command autonomousCommand;
 	SendableChooser<Command> chooser = new SendableChooser<>();
 	
+	CameraServer cameraServer;
+	
 	//array because there are three motors per side
 	RobotDrive[] robotDrives;
 	Joystick driveStick;
@@ -60,6 +62,9 @@ public class Robot extends IterativeRobot {
 		}
 		//XBOX Controller
 		driveStick = new Joystick(0);
+		//Camera Server
+		cameraServer = CameraServer.getInstance();
+		cameraServer.startAutomaticCapture();
 		System.out.println("Robot Initialization Complete");
 	}
 	
@@ -111,7 +116,7 @@ public class Robot extends IterativeRobot {
 			autonomousCommand.start();
 	}
 
-	/**
+	/**NUM_MOTORS
 	 * This function is called periodically during autonomous
 	 */
 	@Override
