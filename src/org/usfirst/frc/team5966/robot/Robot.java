@@ -23,6 +23,7 @@ public class Robot extends IterativeRobot {
 
 	final int NUM_MOTORS = 3;
 	final int NUM_OF_PWM_SLOTS = 9;
+	final int TRIGGER_AXIS = 3;
 	
 	public static final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
 	public static OI oi;
@@ -37,6 +38,7 @@ public class Robot extends IterativeRobot {
 	Joystick driveStick;
 	VictorSP[] leftMotors;
 	VictorSP[] rightMotors;
+	VictorSP winchMotor;
 
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -61,6 +63,7 @@ public class Robot extends IterativeRobot {
 			robotDrives[i] = new RobotDrive(leftMotors[i],
 					 rightMotors[i]);
 		}
+		winchMotor = new VictorSP(5);
 		//XBOX Controller
 		driveStick = new Joystick(0);
 		//Camera Server
@@ -150,6 +153,12 @@ public class Robot extends IterativeRobot {
 			for (int i = 0; i < NUM_MOTORS; i++)
 			{
 				robotDrives[i].arcadeDrive(driveStick);
+			}
+			//winch controls
+			double triggerData = driveStick.getRawAxis(TRIGGER_AXIS);
+			if (triggerData > 0.5)
+			{
+				winchMotor.setSpeed(triggerData);
 			}
 			Timer.delay(0.01);
 		}
