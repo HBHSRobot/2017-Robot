@@ -40,6 +40,9 @@ public class Robot extends IterativeRobot {
 	VictorSP[] rightMotors;
 	VictorSP winchMotor;
 
+	boolean autoMode;
+	int autoCount;
+
 	/**
 	 * This function is run when the robot is first started up and should be
 	 * used for any initialization code.
@@ -120,6 +123,8 @@ public class Robot extends IterativeRobot {
 		// schedule the autonomous command (example)
 		if (autonomousCommand != null)
 			autonomousCommand.start();
+		autoMode = true;
+		autoCount = 3;
 	}
 
 	/**NUM_MOTORS
@@ -127,7 +132,21 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousPeriodic() {
-		Scheduler.getInstance().run();
+		for(int i = 0; i < NUM_MOTORS; i++){
+			if(autoMode == true){
+				robotDrives[i].drive(0.2, 0);
+			}else if(autoMode == false)
+			{
+				robotDrives[i].drive(0, 0);
+			}
+		}
+		while(autoCount != 0){
+			autoCount--;
+			Timer.delay(1.0);
+		}
+		if(autoCount == 0){
+			autoMode = false;
+		}
 	}
 
 	@Override
