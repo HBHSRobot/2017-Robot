@@ -19,11 +19,16 @@ import org.usfirst.frc.team5966.robot.subsystems.ExampleSubsystem;
  * creating this project, you must also update the manifest file in the resource
  * directory.
  */
-public class Robot extends IterativeRobot {
+public class Robot extends IterativeRobot implements Runnable {
 
+	final double SPEED = 0.32;
 	final int NUM_MOTORS = 3;
 	final int NUM_OF_PWM_SLOTS = 9;
 	final int TRIGGER_AXIS = 3;
+	final int TIMER = 2 * 1000;
+	final boolean teleOp = false;
+	
+	static boolean autoMode2 = false;
 	
 	public static final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
 	public static OI oi;
@@ -39,6 +44,10 @@ public class Robot extends IterativeRobot {
 	VictorSP[] leftMotors;
 	VictorSP[] rightMotors;
 	VictorSP winchMotor;
+	int autoCount = 3;
+	static boolean autoMode = false;
+
+
 
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -57,11 +66,13 @@ public class Robot extends IterativeRobot {
 		robotDrives = new RobotDrive[NUM_MOTORS];
 		for (int i = 0; i < NUM_MOTORS; i++)
 		{
-			leftMotors[i] = new VictorSP(i);
-			rightMotors[i] = new VictorSP(NUM_OF_PWM_SLOTS - i);
+			leftMotors[i] = new VictorSP(NUM_OF_PWM_SLOTS - i);
+			rightMotors[i] = new VictorSP(i);
 			
 			robotDrives[i] = new RobotDrive(leftMotors[i],
 					 rightMotors[i]);
+			leftMotors[i].setInverted(true);
+			rightMotors[i].setInverted(true);
 		}
 		winchMotor = new VictorSP(5);
 		//XBOX Controller
@@ -118,14 +129,48 @@ public class Robot extends IterativeRobot {
 		// schedule the autonomous command (example)
 		if (autonomousCommand != null)
 			autonomousCommand.start();
+		autoMode = true;
+		autoMode2 = false;
+		//autoCount = 3;
 	}
 
+	public void run(){
+		System.out.println("Started Autonomous Timer Thread");
+		try
+		{
+			Thread.sleep(TIMER);
+			autoMode = false;
+			/*autoMode2 = true;
+			Thread.sleep(TIMER);
+			autoMode2 = false;
+			*/
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
 	/**NUM_MOTORS
 	 * This function is called periodically during autonomous
 	 */
 	@Override
 	public void autonomousPeriodic() {
-		Scheduler.getInstance().run();
+		(new Thread(new Robot())).start();
+		while(autoMode == true)
+		{
+			for(int i = 0; i < NUM_MOTORS; i++){
+				robotDrives[i].drive(-SPEED, 0);
+				//robotDrives[i].drive(SPEED, 3);
+			}
+		}
+		/*while(autoMode2 == true)
+		{
+			for(int i = 0; i < NUM_MOTORS; i++){
+				//robotDrives[i].drive(SPEED, 0);
+				robotDrives[i].drive(-SPEED, 0);
+			}
+		}*/
 	}
 
 	@Override
