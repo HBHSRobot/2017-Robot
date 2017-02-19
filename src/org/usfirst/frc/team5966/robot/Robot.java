@@ -22,6 +22,8 @@ import org.usfirst.frc.team5966.robot.subsystems.ExampleSubsystem;
 public class Robot extends IterativeRobot {
 
 	final int NUM_MOTORS = 3;
+	final int NUM_OF_PWM_SLOTS = 9;
+	final int TRIGGER_AXIS = 3;
 	
 	public static final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
 	public static OI oi;
@@ -29,11 +31,14 @@ public class Robot extends IterativeRobot {
 	Command autonomousCommand;
 	SendableChooser<Command> chooser = new SendableChooser<>();
 	
+	CameraServer cameraServer;
+	
 	//array because there are three motors per side
 	RobotDrive[] robotDrives;
 	Joystick driveStick;
 	VictorSP[] leftMotors;
 	VictorSP[] rightMotors;
+	VictorSP winchMotor;
 
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -53,13 +58,17 @@ public class Robot extends IterativeRobot {
 		for (int i = 0; i < NUM_MOTORS; i++)
 		{
 			leftMotors[i] = new VictorSP(i);
-			rightMotors[i] = new VictorSP(i + NUM_MOTORS);
+			rightMotors[i] = new VictorSP(NUM_OF_PWM_SLOTS - i);
 			
 			robotDrives[i] = new RobotDrive(leftMotors[i],
 					 rightMotors[i]);
 		}
+		winchMotor = new VictorSP(5);
 		//XBOX Controller
 		driveStick = new Joystick(0);
+		//Camera Server
+		cameraServer = CameraServer.getInstance();
+		cameraServer.startAutomaticCapture();
 		System.out.println("Robot Initialization Complete");
 	}
 	
@@ -111,7 +120,7 @@ public class Robot extends IterativeRobot {
 			autonomousCommand.start();
 	}
 
-	/**
+	/**NUM_MOTORS
 	 * This function is called periodically during autonomous
 	 */
 	@Override
@@ -144,6 +153,16 @@ public class Robot extends IterativeRobot {
 			for (int i = 0; i < NUM_MOTORS; i++)
 			{
 				robotDrives[i].arcadeDrive(driveStick);
+			}
+			//winch controls
+			double triggerData = driveStick.getRawAxis(TRIGGER_AXIS);
+			if (triggerData > 0.5)
+			{
+				winchMotor.setSpeed(triggerData);
+			}
+			else
+			{
+				winchMotor.setSpeed(0.0);
 			}
 			Timer.delay(0.01);
 		}
