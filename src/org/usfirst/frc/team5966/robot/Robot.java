@@ -160,6 +160,10 @@ public class Robot extends IterativeRobot {
 			{
 				winchMotor.setSpeed(triggerData);
 			}
+			else
+			{
+				winchMotor.setSpeed(0.0);
+			}
 			Timer.delay(0.01);
 		}
 	}
