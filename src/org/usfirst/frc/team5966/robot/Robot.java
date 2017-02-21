@@ -25,7 +25,7 @@ public class Robot extends IterativeRobot implements Runnable {
 	final int NUM_MOTORS = 3;
 	final int NUM_OF_PWM_SLOTS = 9;
 	final int TRIGGER_AXIS = 3;
-	final int TIMER = 2 * 1000;
+	final int TIMER = 3 * 1000;
 	final boolean teleOp = false;
 	
 	static boolean autoMode2 = false;
@@ -118,7 +118,7 @@ public class Robot extends IterativeRobot implements Runnable {
 		System.out.println("Autonomous Mode Initialized");
 		autonomousCommand = chooser.getSelected();
 
-		/*
+		/*RobotDrive
 		 * String autoSelected = SmartDashboard.getString("Auto Selector",
 		 * "Default"); switch(autoSelected) 
 		{ case "My Auto": autonomousCommand
@@ -201,13 +201,23 @@ public class Robot extends IterativeRobot implements Runnable {
 			}
 			//winch controls
 			double triggerData = driveStick.getRawAxis(TRIGGER_AXIS);
-			if (triggerData > 0.5)
+			if (triggerData > 0.1)
 			{
 				winchMotor.setSpeed(triggerData);
 			}
 			else
 			{
 				winchMotor.setSpeed(0.0);
+			}
+			//fine robot control
+			double rightStickXData = driveStick.getRawAxis(4);
+			double rightStickYData = driveStick.getRawAxis(5);
+			if (rightStickXData > 0.1 || rightStickXData < -0.1 || rightStickYData > 0.1 || rightStickYData < -0.1)
+			{
+				for (int i = 0; i < NUM_MOTORS; i++)
+				{
+					robotDrives[i].drive(-1 * rightStickYData, -1 * rightStickXData);
+				}
 			}
 			Timer.delay(0.01);
 		}
