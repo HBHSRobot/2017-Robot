@@ -244,16 +244,27 @@ public class Robot extends IterativeRobot implements Runnable{
 			}
 			//winch controls
 			double triggerData = driveStick.getRawAxis(TRIGGER_AXIS);
-			if (triggerData > 0.5)
+			if (triggerData > 0.1)
 			{
 				winchMotor.setSpeed(triggerData);
 			}
-			System.out.println("X: " + driveStick.getRawAxis(4));
-			System.out.println("Y: " + driveStick.getRawAxis(5));
-			System.out.println("Trigger: " + triggerData);
+			else
+			{
+				winchMotor.setSpeed(0.0);
+			}
+			//fine robot control
+			double rightStickXData = driveStick.getRawAxis(4);
+			double rightStickYData = driveStick.getRawAxis(5);
+			if (rightStickXData > 0.1 || rightStickXData < -0.1 || rightStickYData > 0.1 || rightStickYData < -0.1)
+			{
+				for (int i = 0; i < NUM_MOTORS; i++)
+				{
+					robotDrives[i].drive((-1 * rightStickYData) / 2, (-1 * rightStickXData) / 2);
+				}
+			}
 			Timer.delay(0.01);
 		}
-	}
+}
 
 	/**
 	 * This function is called periodically during test mode, it is unused
