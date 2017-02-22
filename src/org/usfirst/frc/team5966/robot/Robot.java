@@ -26,6 +26,7 @@ public class Robot extends IterativeRobot implements Runnable{
 	final int NUM_MOTORS = 3;
 	final int NUM_OF_PWM_SLOTS = 9;
 	final int TRIGGER_AXIS = 3;
+	final int FINE_CONTROL_DIVISION = 2;
 	//3500 for left & right mode, 1500 for middle mode
     int timer;
     double speed;
@@ -259,7 +260,7 @@ public class Robot extends IterativeRobot implements Runnable{
 			{
 				for (int i = 0; i < NUM_MOTORS; i++)
 				{
-					robotDrives[i].drive((-1 * rightStickYData) / 2, (-1 * rightStickXData) / 2);
+					robotDrives[i].drive((-1 * rightStickYData) / FINE_CONTROL_DIVISION, (-1 * rightStickXData) / FINE_CONTROL_DIVISION);
 				}
 			}
 			Timer.delay(0.01);
