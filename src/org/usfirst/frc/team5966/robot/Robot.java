@@ -216,7 +216,7 @@ public class Robot extends IterativeRobot implements Runnable {
 			{
 				for (int i = 0; i < NUM_MOTORS; i++)
 				{
-					robotDrives[i].drive(-1 * rightStickYData, -1 * rightStickXData);
+					robotDrives[i].drive((-1 * rightStickYData) / 2, (-1 * rightStickXData) / 2);
 				}
 			}
 			Timer.delay(0.01);
