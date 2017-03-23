@@ -2,7 +2,6 @@ package org.usfirst.frc.team5966.robot;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.RobotDrive;
-import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
@@ -20,21 +19,17 @@ import org.usfirst.frc.team5966.robot.subsystems.ExampleSubsystem;
  * creating this project, you must also update the manifest file in the resource
  * directory.
  */
-public class Robot extends IterativeRobot implements Runnable{
-	
-	final double BASE_SPEED = -0.32;
+public class Robot extends IterativeRobot implements Runnable {
+
+	final double SPEED = 0.32;
 	final int NUM_MOTORS = 3;
 	final int NUM_OF_PWM_SLOTS = 9;
-	final int TRIGGER_AXIS = 3;
-	final int FINE_CONTROL_DIVISION = 2;
-	//3500 for left & right mode, 1500 for middle mode
-    int timer;
-    double speed;
-    static boolean autoMode = false;
-	static boolean forwards = false;
-	static boolean backwards = false;
-	//set middleMode to true if the robot is placed in the middle, false if on left or right side
-	static boolean middleMode = false;
+	final int RIGHT_TRIGGER_AXIS = 3;
+	final int LEFT_TRIGGER_AXIS = 2;
+	final int TIMER = 1500;
+	final boolean teleOp = false;
+	
+	static boolean autoMode2 = false;
 	
 	public static final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
 	public static OI oi;
@@ -50,7 +45,8 @@ public class Robot extends IterativeRobot implements Runnable{
 	VictorSP[] leftMotors;
 	VictorSP[] rightMotors;
 	VictorSP winchMotor;
-	
+	int autoCount = 3;
+	static boolean autoMode = false;
 
 
 
@@ -62,13 +58,13 @@ public class Robot extends IterativeRobot implements Runnable{
 	public void robotInit() {
 		oi = new OI();
 		chooser.addDefault("Default Auto", new ExampleCommand());
+		// chooser.addObject("My Auto", new MyAutoCommand());
 		SmartDashboard.putData("Auto mode", chooser);
 		//left motors are PWM 0, 1, 2
 		//right motors are PWM 3, 4, 5
 		leftMotors = new VictorSP[NUM_MOTORS];
 		rightMotors = new VictorSP[NUM_MOTORS];
 		robotDrives = new RobotDrive[NUM_MOTORS];
-		//initialize all of the RobotDrive elements in the array and initialize all of the VictorSP objects and invert them
 		for (int i = 0; i < NUM_MOTORS; i++)
 		{
 			leftMotors[i] = new VictorSP(NUM_OF_PWM_SLOTS - i);
@@ -79,15 +75,12 @@ public class Robot extends IterativeRobot implements Runnable{
 			leftMotors[i].setInverted(true);
 			rightMotors[i].setInverted(true);
 		}
-		//initaialize the winch motor at PWM 5
 		winchMotor = new VictorSP(5);
 		//XBOX Controller
 		driveStick = new Joystick(0);
-		//Camera Server: add the Lifecam USB webcam and start capturing video from it
+		//Camera Server
 		cameraServer = CameraServer.getInstance();
-		UsbCamera camera = new UsbCamera("Lifecam", "/dev/video0");
-		cameraServer.addCamera(camera);
-		cameraServer.startAutomaticCapture(camera);
+		cameraServer.startAutomaticCapture();
 		System.out.println("Robot Initialization Complete");
 	}
 	
@@ -138,40 +131,14 @@ public class Robot extends IterativeRobot implements Runnable{
 		if (autonomousCommand != null)
 			autonomousCommand.start();
 		autoMode = true;
-		backwards = false;
-		forwards = true;
-		//autoCount = 3;
 	}
-	
-	/**
-	 * Handles the timer thread for autonomous mode and switches boolean variables to signal the robot when time events happen
-	 */
+
 	public void run(){
 		System.out.println("Started Autonomous Timer Thread");
 		try
 		{
-			/*middleMode selects if the robot should drive forward less so that it can deliver a gear if it is true
-			  if it is false, then the robot will drive to the base line then drive backwards*/
-			if(middleMode == true)
-			{
-				Thread.sleep(timer);
-				autoMode = false;
-			}
-			else
-			{
-				/*autoMode is true upon starting autonomous mode.
-				  Robot runs at speed specified by autoMode for TIMER amount of seconds (defined at the top of the class)
-				  After TIMER amount of seconds, autoMode is disabled, enabling autoMode2.
-				  Robot runs at speed specified by autoMode2 for TIMER seconds, then stops. */
-				Thread.sleep(timer);
-				forwards = false;
-				//disable everything below this if you want to use the middle slot (leave autoMode = false;)
-				backwards = true;
-				Thread.sleep(timer);
-				backwards = false;
-				//trying something out
-				autoMode = false;
-			}
+			Thread.sleep(TIMER);
+			autoMode = false;
 		}
 		catch(Exception e)
 		{
@@ -187,38 +154,15 @@ public class Robot extends IterativeRobot implements Runnable{
 		(new Thread(new Robot())).start();
 		while(autoMode == true)
 		{
-			if(middleMode == true)
-			{
-				timer = 1500;
-				speed = BASE_SPEED;
-			}
-			else
-			{
-				timer = 3500;
-				if(forwards == true)
-				{
-					speed = BASE_SPEED;
-				}
-				else if(backwards == true)
-				{
-					speed = -BASE_SPEED;
-				}
-			}
-			for(int i = 0; i < NUM_MOTORS; i++)
-			{
-				robotDrives[i].drive(speed, 0);
+			for(int i = 0; i < NUM_MOTORS; i++){
+				robotDrives[i].drive(-SPEED, 0);
+				//robotDrives[i].drive(SPEED, 3);
 			}
 		}
-		/*while(autoMode2 == true)
-		{
-			for(int i = 0; i < NUM_MOTORS; i++){
-				//robotDrives[i].drive(SPEED, 0);
-				robotDrives[i].drive(SPEED, 0);
-			}
-		}*/
 	}
 
-	@Override	
+	@Override
+	
 	public void teleopInit() {
 		// This makes sure that the autonomous stops running when
 		// teleop starts running. If you want the autonomous to
@@ -244,31 +188,26 @@ public class Robot extends IterativeRobot implements Runnable{
 				robotDrives[i].arcadeDrive(driveStick);
 			}
 			//winch controls
-			double triggerData = driveStick.getRawAxis(TRIGGER_AXIS);
-			if (triggerData > 0.1)
+			double rightTriggerData = driveStick.getRawAxis(RIGHT_TRIGGER_AXIS);
+			double leftTriggerData =  driveStick.getRawAxis(LEFT_TRIGGER_AXIS);
+			if (rightTriggerData > 0.1)
 			{
-				winchMotor.setSpeed(triggerData);
+				winchMotor.setSpeed(rightTriggerData);
+			}
+			else if (leftTriggerData > 0.1)
+			{
+				winchMotor.setSpeed((-1 * leftTriggerData));
 			}
 			else
 			{
 				winchMotor.setSpeed(0.0);
 			}
-			//fine robot control
-			double rightStickXData = driveStick.getRawAxis(4);
-			double rightStickYData = driveStick.getRawAxis(5);
-			if (rightStickXData > 0.1 || rightStickXData < -0.1 || rightStickYData > 0.1 || rightStickYData < -0.1)
-			{
-				for (int i = 0; i < NUM_MOTORS; i++)
-				{
-					robotDrives[i].drive((-1 * rightStickYData) / FINE_CONTROL_DIVISION, (-1 * rightStickXData) / FINE_CONTROL_DIVISION);
-				}
-			}
 			Timer.delay(0.01);
 		}
-}
+	}
 
 	/**
-	 * This function is called periodically during test mode, it is unused
+	 * This function is called periodically during test mode
 	 */
 	@Override
 	public void testPeriodic() {
