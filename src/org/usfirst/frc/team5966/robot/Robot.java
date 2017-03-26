@@ -19,11 +19,18 @@ import org.usfirst.frc.team5966.robot.subsystems.ExampleSubsystem;
  * creating this project, you must also update the manifest file in the resource
  * directory.
  */
-public class Robot extends IterativeRobot {
+public class Robot extends IterativeRobot implements Runnable {
 
+	final double SPEED = 0.32;
 	final int NUM_MOTORS = 3;
 	final int NUM_OF_PWM_SLOTS = 9;
-	final int TRIGGER_AXIS = 3;
+	final int RIGHT_TRIGGER_AXIS = 3;
+	final int LEFT_TRIGGER_AXIS = 2;
+	final int TIMER = 1500;
+	final boolean teleOp = false;
+	int angle = 0;
+	
+	static boolean autoMode2 = false;
 	
 	public static final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
 	public static OI oi;
@@ -39,9 +46,10 @@ public class Robot extends IterativeRobot {
 	VictorSP[] leftMotors;
 	VictorSP[] rightMotors;
 	VictorSP winchMotor;
+	int autoCount = 3;
+	static boolean autoMode = false;
 
-	boolean autoMode;
-	int autoCount;
+
 
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -124,28 +132,51 @@ public class Robot extends IterativeRobot {
 		if (autonomousCommand != null)
 			autonomousCommand.start();
 		autoMode = true;
-		autoCount = 3;
 	}
 
+	public void run(){
+		System.out.println("Started Autonomous Timer Thread");
+		try
+		{
+			angle = 0;
+			Thread.sleep(TIMER/2);
+			angle = 30;
+			Thread.sleep(TIMER/8);
+			angle *=  -1;
+			Thread.sleep(TIMER/8);
+			angle *=  -1;
+			Thread.sleep(TIMER/8);
+			angle *=  -1;
+			Thread.sleep(TIMER/8);
+			autoMode = false;
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
 	/**NUM_MOTORS
 	 * This function is called periodically during autonomous
 	 */
 	@Override
 	public void autonomousPeriodic() {
-		for(int i = 0; i < NUM_MOTORS; i++){
-			if(autoMode == true){
-				robotDrives[i].drive(0.2, 0);
-			}else if(autoMode == false)
+		(new Thread(new Robot())).start();
+		int lastAngle = -1;
+		while(autoMode == true)
+		{
+			boolean doStop = false;
+			if (lastAngle != angle)
 			{
-				robotDrives[i].drive(0, 0);
+				lastAngle = angle;
+				doStop = true;
 			}
-		}
-		while(autoCount != 0){
-			autoCount--;
-			Timer.delay(1.0);
-		}
-		if(autoCount == 0){
-			autoMode = false;
+			for(int i = 0; i < NUM_MOTORS; i++){
+				if (doStop)
+					robotDrives[i].stopMotor();
+				robotDrives[i].drive(-SPEED, angle);
+				//robotDrives[i].drive(SPEED, 3);
+			}
 		}
 	}
 
@@ -176,10 +207,19 @@ public class Robot extends IterativeRobot {
 				robotDrives[i].arcadeDrive(driveStick);
 			}
 			//winch controls
-			double triggerData = driveStick.getRawAxis(TRIGGER_AXIS);
-			if (triggerData > 0.5)
+			double rightTriggerData = driveStick.getRawAxis(RIGHT_TRIGGER_AXIS);
+			double leftTriggerData =  driveStick.getRawAxis(LEFT_TRIGGER_AXIS);
+			if (rightTriggerData > 0.1)
 			{
-				winchMotor.setSpeed(triggerData);
+				winchMotor.setSpeed(rightTriggerData);
+			}
+			else if (leftTriggerData > 0.1)
+			{
+				winchMotor.setSpeed((-1 * leftTriggerData));
+			}
+			else
+			{
+				winchMotor.setSpeed(0.0);
 			}
 			Timer.delay(0.01);
 		}
